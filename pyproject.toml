@@ -4,7 +4,6 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tfadm"
-version = "0.11.0"
 requires-python = ">=3.7"
 description = "Generates and modifies terraform code in JSON syntax."
 readme = "README.md"
@@ -28,6 +27,10 @@ dependencies = [
   "python-slugify>=7.0.0",
   "pyyaml>=6.0",
 ]
+dynamic = ["version"]
+
+[tool.hatch.version]
+path = "src/tfadm/__init__.py"
 
 [project.urls]
 "Homepage" = "https://github.com/nuncard/tfadm"
