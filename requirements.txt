@@ -1,0 +1,5 @@
+click>=8.0
+Jinja2>=3.0.0
+parse>=1.19.0
+python-slugify>=7.0.0
+pyyaml>=6.0
