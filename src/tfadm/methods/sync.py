@@ -173,8 +173,11 @@ class Sync(Method):
 
       if condition and not opts.get('force', False):
         if isinstance(condition, str):
-          if not jinja.compile_expression(condition)(**args):
-            continue
+          try:
+            if not jinja.compile_expression(condition)(**args):
+              continue
+          except Exception as e:
+            raise Error(str(self.context / 'when'), *e.args)
         elif not match(props(args, defaults=False, slugs=False), condition):
           continue
 

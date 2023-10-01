@@ -100,11 +100,17 @@ class Resource(Settings):
         if not isinstance(settings, list):
           settings = [settings]
 
+        i = -1
+
         for item in settings:
+          i += 1
           condition = item.get('when')
 
-          if condition and not jinja.compile_expression(condition)(**args):
-            continue
+          try:
+            if condition and not jinja.compile_expression(condition)(**args):
+              continue
+          except Exception as e:
+            raise Error(self.name + '/events/' + event + '/' + cmd_name + '/' + i + '/when', *e.args)
 
           unset = item.get('unset', [])
 
