@@ -17,7 +17,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Fixed
 
-- Trigger events using user arguments plus computed inheritance.
+- Trigger events using user arguments plus computed inheritance;
+- Don't ignore default values when updating an object that doesn't exist.
 
 ## [0.11.0] - 2023-09-17
 

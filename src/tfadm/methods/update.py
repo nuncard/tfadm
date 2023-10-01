@@ -101,9 +101,12 @@ class Update(Method):
         action = 'Updated'
         created = False
       else:
+        if not defaults:
+          args_ = props(args)
+
         try:
           # Convert arguments to settings and validates the request as well
-          settings_ = props.tosettings(args_, defaults=(defaults or not overwrite))
+          settings_ = props.tosettings(args_)
         except ValueError as e:
           raise RequiredArgument(resource.name, *e.args)
 
