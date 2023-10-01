@@ -166,9 +166,10 @@ class Sync(Method):
 
     for args in settings:
       args = props.sync(args)
+      args_ = props(args, defaults=False, slugs=False)
 
       if filters_:
-        if not match(props(args, defaults=False, slugs=False), filters_, literally=True):
+        if not match(args_, filters_, literally=True):
           continue
 
       if condition and not opts.get('force', False):
@@ -178,19 +179,20 @@ class Sync(Method):
               continue
           except Exception as e:
             raise Error(str(self.context / 'when'), *e.args)
-        elif not match(props(args, defaults=False, slugs=False), condition):
+        elif not match(args, condition):
           continue
 
       args = merge(merge({}, heritage), args, clone=False)
+      args_ = props(args, defaults=False, slugs=False)
 
       if parent:
         required = set()
-        pprops.primarykey(args, required=required)
+        pprops.primarykey(args_, required=required)
 
         if required:
-          required = ', '.join(required)
-          print(self.owner.name + ".primary_key:", props.primarykey(args))
-          print(self.owner.name + ": Missing argument:", required)
+          required.clear()
+          print(self.owner.name + ".primary_key:", props.primarykey(args_, required=required))
+          print(self.owner.name + ": Missing argument:", ', '.join(required))
           _ = parent.list(pprops.heritage(args), lambda _: callback(merge(pprops.heritage(_), args, clone=False)))
 
           if _ > 0:

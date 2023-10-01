@@ -205,10 +205,6 @@ class Resources(dict):
         if resource.name.startswith('.'):
           count += self.each(lambda r: callback(r, *args, **kwds), resource)
         else:
-          print()
-          secho(resource.name.upper(), bold=True)
-          print()
-
           callback(resource, *args, **kwds)
           count += 1
 

@@ -221,7 +221,7 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
         condition = item.get('when')
 
         try:
-          _ = (not condition or jinja.compile_expression(condition)(**args))
+          _ = (not condition or jinja.compile_expression(condition)(**args_))
         except Exception as e:
           raise Error(key + '/unset/' + i + '/when', *e.args)
 
