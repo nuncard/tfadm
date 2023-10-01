@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Added
 
-- Added the Unreleased section to CHANGELOG.md
+- Added the Unreleased section to CHANGELOG.md;
+- Handle exceptions raised by the `compile_expression` Jinja function.
 
 ### Changed
 
@@ -20,5 +21,5 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 - First release.
 
-[unreleased]: https://github.com/nuncard/tfadm/compare/v0.11.0...HEAD
+[unreleased]: https://github.com/nuncard/tfadm/compare/v0.11.0...dev
 [0.11.0]: https://github.com/nuncard/tfadm/releases/tag/v0.11.0

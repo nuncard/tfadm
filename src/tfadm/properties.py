@@ -1,9 +1,10 @@
-from .exceptions import PatternError
+from .exceptions import Error, PatternError
 from .settings import get, getformat, merge, update, pop
 from .template import jinja
 from collections import UserDict
 from collections.abc import Mapping
 from json import dumps as json_encode, loads as json_decode
+from pathlib import PurePosixPath
 from slugify import slugify as fnslugify
 from zlib import adler32, crc32
 import hashlib
@@ -23,8 +24,11 @@ def conflits(properties:Mapping, args:Mapping, prefix:str='', root=None) -> list
   for key, prop in properties.items():
     condition = prop.get('when')
 
-    if condition and not jinja.compile_expression(condition)(_=root, **args):
-      continue
+    try:
+      if condition and not jinja.compile_expression(condition)(_=root, **args):
+        continue
+    except Exception as e:
+      raise Error(key + '/when', *e.args)
 
     alias = prop.get('alias', key)
     value = args.get(alias)
@@ -66,7 +70,10 @@ def compute(prop:Mapping, value, args:Mapping):
   expr = prop.get('expr')
 
   if expr:
-    value = jinja.compile_expression(expr)(this=value, **args)
+    try:
+      value = jinja.compile_expression(expr)(this=value, **args)
+    except Exception as e:
+      raise Error('expr', *e.args)
 
   if not isinstance(value, str):
     return value
@@ -150,8 +157,11 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
   for key, prop in properties.items():
     condition = prop.get('when')
 
-    if condition and not jinja.compile_expression(condition)(**args_):
-      continue
+    try:
+      if condition and not jinja.compile_expression(condition)(**args_):
+        continue
+    except Exception as e:
+      raise Error(key + '/when', *e.args)
 
     alias = prop.get('alias', key)
 
@@ -163,7 +173,12 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
     props = prop.get('properties')
 
     if props:
-      value = merge(value, init(props, value, defaults, slugs, root), clone=False)
+      try:
+        value = merge(value, init(props, value, defaults, slugs, root), clone=False)
+      except KeyError as e:
+        raise KeyError(key, 'properties', *e.args)
+      except Error as e:
+        raise Error(key + '/properties/' + e.args[0], *e.args[1:])
 
       if not value:
         continue
@@ -176,7 +191,12 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
         except:
           pass
 
-      value = compute(prop, value, args_)
+      try:
+        value = compute(prop, value, args_)
+      except KeyError as e:
+        raise KeyError(key, *e.args)
+      except Error as e:
+        raise Error(key + '/' + e.args[0], *e.args[1:])
 
       if value is None:
         continue
@@ -189,15 +209,23 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
 
     if isinstance(value, Mapping):
       unset = prop.get('unset', [])
+      i = -1
 
       for item in unset:
+        i += 1
+
         if isinstance(item, str):
           pop(value, item)
           continue
 
         condition = item.get('when')
 
-        if not condition or jinja.compile_expression(condition)(**args):
+        try:
+          _ = (not condition or jinja.compile_expression(condition)(**args))
+        except Exception as e:
+          raise Error(key + '/unset/' + i + '/when', *e.args)
+
+        if _:
           pop(value, item.get('key'))
 
     args[alias] = value
@@ -221,7 +249,10 @@ def onbeforesaving(properties:Mapping, settings:Mapping, root:Mapping=None) -> M
     props = prop.get('properties')
 
     if props:
-      onbeforesaving(props, value, root)
+      try:
+        onbeforesaving(props, value, root)
+      except Error as e:
+        raise Error(key + '/properties/' + e.args[0], *e.args[1:])
 
       if not value:
         pop(settings, key)
@@ -229,7 +260,10 @@ def onbeforesaving(properties:Mapping, settings:Mapping, root:Mapping=None) -> M
       expr = prop.get('onbeforesaving')
 
       if expr:
-        jinja.compile_expression(expr)(_=root, __=settings, this=value, **settings)
+        try:
+          jinja.compile_expression(expr)(_=root, __=settings, this=value, **settings)
+        except Exception as e:
+          raise Error(key + '/onbeforesaving', *e.args)
 
       if value is None:
         if not prop.get('nullable', False):
@@ -291,8 +325,11 @@ def tosettings(properties:Mapping, args:Mapping, defaults:bool=True, root:Mappin
 
     condition = prop.get('when')
 
-    if condition and not jinja.compile_expression(condition)(**args_):
-      continue
+    try:
+      if condition and not jinja.compile_expression(condition)(**args_):
+        continue
+    except Exception as e:
+      raise Error(key + '/when', *e.args)
 
     alias = prop.get('alias', key)
     value = args.get(alias)
@@ -300,7 +337,10 @@ def tosettings(properties:Mapping, args:Mapping, defaults:bool=True, root:Mappin
 
     try:
       if props:
-        value = tosettings(props, value, defaults, root)
+        try:
+          value = tosettings(props, value, defaults, root)
+        except Error as e:
+          raise Error(key + '/properties/' + e.args[0], *e.args[1:])
 
         if not value:
           continue
@@ -377,6 +417,7 @@ class Properties(UserDict):
     super().__init__(get(cfg, key))
     self.owner = owner
     self.key = key
+    self.context = PurePosixPath(owner.name, self.key)
 
     def inherit(alias, prop):
       if alias in owner.path:
@@ -390,7 +431,9 @@ class Properties(UserDict):
     try:
       return init(self, args, defaults=defaults, slugs=slugs)
     except KeyError as e:
-      raise PatternError(self.owner.name, 'properties', *e.args)
+      raise PatternError(self.owner.name, self.key, *e.args)
+    except Error as e:
+      raise Error(str(self.context / e.args[0]), *e.args[1:])
 
   def _inherit(self):
     resource = self.owner
