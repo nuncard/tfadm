@@ -160,17 +160,17 @@ class Update(Method):
       print(context + ':', action, source, address)
 
       heritage = props.heritage(args_)
-      _ = merge(heritage, args)
+      _ = merge({}, args, heritage)
 
       if init:
-        resource.trigger('init', _, dry_run=dry_run)
+        resource.trigger('init', _, overwrite=overwrite, dry_run=dry_run)
 
       resource.trigger('change', _, overwrite=overwrite, dry_run=dry_run)
 
       if created:
         resource.trigger('create', _, overwrite=overwrite, dry_run=dry_run)
       else:
-        resource.trigger('update', _, dry_run=dry_run)
+        resource.trigger('update', _, overwrite=overwrite, dry_run=dry_run)
 
     # --------------------------------------------------------------------------
 

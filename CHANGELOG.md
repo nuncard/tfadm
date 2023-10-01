@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 - Changed `version` in project metadata from static to dynamic.
 
+### Fixed
+
+- Trigger events using user arguments plus computed inheritance.
+
 ## [0.11.0] - 2023-09-17
 
 ### Added
