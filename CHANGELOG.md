@@ -8,7 +8,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Added
 
-- Added the Unreleased section to CHANGELOG.md;
 - Handle exceptions raised by the `compile_expression` Jinja function.
 
 ### Changed
