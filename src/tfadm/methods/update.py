@@ -123,9 +123,6 @@ class Update(Method):
       pprint({context + '.arguments': args_})
       raise e
 
-    for key in props.conflits(args_):
-      pop(settings, key)
-
     conflits_with = resource.conflits_with
 
     if conflits_with:

@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Added `events/{event}/{command}/{resource}/internal` config key;
 - Added `onbeforesave` event.
 
+### Changed
+
+- Removed `properties\{name}\conflits_with` config key.
+
 ### Fixed
 
 - Apply `when` condition when getting primary key arguments;
