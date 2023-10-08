@@ -4,6 +4,7 @@ from .template import jinja
 from collections import UserDict
 from collections.abc import Mapping
 from json import dumps as json_encode, loads as json_decode
+from os.path import dirname
 from pathlib import PurePosixPath
 from slugify import slugify as fnslugify
 from zlib import adler32, crc32
@@ -11,49 +12,6 @@ import hashlib
 import re
 
 slugify_regex = r'[^-a-zA-Z0-9_]+'
-
-def conflits(properties:Mapping, args:Mapping, prefix:str='', root=None) -> list:
-  keys = []
-
-  if args is None:
-    args = {}
-
-  if root is None:
-    root = args
-
-  for key, prop in properties.items():
-    condition = prop.get('when')
-
-    try:
-      if condition and not jinja.compile_expression(condition)(_=root, **args):
-        continue
-    except Exception as e:
-      raise Error(key + '/when', *e.args)
-
-    alias = prop.get('alias', key)
-    value = args.get(alias)
-
-    if value is None:
-      continue
-
-    conflits_with = prop.get('conflits_with')
-
-    if conflits_with:
-      if isinstance(conflits_with, str):
-        conflits_with = [conflits_with]
-
-      for _ in conflits_with:
-        keys.append(prefix + _)
-
-      continue
-
-    props = prop.get('properties')
-
-    if props:
-      key = prop.get('use', key)
-      keys.extend(conflits(props, value, prefix + key + '/', root))
-
-  return keys
 
 def compute(prop:Mapping, value, args:Mapping):
   type_ = prop.get('type')
@@ -64,8 +22,10 @@ def compute(prop:Mapping, value, args:Mapping):
   translator = prop.get('translate')
 
   if translator:
-    key = value if isinstance(value, (str, bool, int, float, complex)) else str(value)
-    value = translator.get(key, value)
+    for v1, v2 in translator.items():
+      if value == v1:
+        value = v2
+        break
 
   expr = prop.get('expr')
 
@@ -192,14 +152,20 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
           pass
 
       try:
-        value = compute(prop, value, args_)
+        _ = compute(prop, value, args_)
       except KeyError as e:
         raise KeyError(key, *e.args)
       except Error as e:
         raise Error(key + '/' + e.args[0], *e.args[1:])
 
-      if value is None:
+      if _ is None:
+        if value is not None:
+          pop(args, alias)
+          pop(args_, alias)
+
         continue
+
+      value = _
 
       if slugs and primary_key:
         alias_ = alias + '_'
@@ -233,55 +199,28 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
 
   return args
 
-def onbeforesaving(properties:Mapping, settings:Mapping, root:Mapping=None) -> Mapping:
-  if settings is None:
-    return settings
-
-  if root is None:
-    root = settings
-
-  for key, prop in properties.items():
-    if prop.get('ignore', False):
-      continue
-
-    key = prop.get('use', key)
-    value = get(settings, key)
-    props = prop.get('properties')
-
-    if props:
-      try:
-        onbeforesaving(props, value, root)
-      except Error as e:
-        raise Error(key + '/properties/' + e.args[0], *e.args[1:])
-
-      if not value:
-        pop(settings, key)
-    else:
-      expr = prop.get('onbeforesaving')
-
-      if expr:
-        try:
-          jinja.compile_expression(expr)(_=root, __=settings, this=value, **settings)
-        except Exception as e:
-          raise Error(key + '/onbeforesaving', *e.args)
-
-      if value is None:
-        if not prop.get('nullable', False):
-          pop(settings, key)
-
-  return settings
-
-def sync(properties:Mapping, settings:Mapping):
+def sync(properties:Mapping, settings:Mapping, root:Mapping=None) -> dict:
   if settings is None:
     settings = {}
 
   this = {}
+
+  if root is None:
+    root = this
 
   for key, prop in properties.items():
     sync_key = prop.get('sync', key)
 
     if sync_key is False:
       continue
+
+    condition = prop.get('when')
+
+    try:
+      if condition and not jinja.compile_expression(condition)(_=root, **this):
+        continue
+    except Exception as e:
+      raise Error(key + '/when', *e.args)
 
     if isinstance(sync_key, list):
       for k in sync_key:
@@ -299,7 +238,7 @@ def sync(properties:Mapping, settings:Mapping):
     props = prop.get('properties')
 
     if props:
-      value = sync(props, value)
+      value = sync(props, value, root)
 
       if not value:
         continue
@@ -474,14 +413,11 @@ class Properties(UserDict):
     self.walk(setdefault)
     self.parent = parent
 
-  def conflits(self, args:Mapping) -> list:
-    return conflits(self.data, args)
-
   def heritage(self, args:Mapping) -> dict:
     this = {}
 
     def callback(alias, prop):
-      if prop.get('inherit', False) or prop.get('primary_key', False):
+      if prop.get('inherit', prop.get('primary_key', False)):
         value = get(args, alias)
 
         if value is not None:
@@ -491,14 +427,20 @@ class Properties(UserDict):
 
     return this
 
-  def onbeforesaving(self, settings):
-    return onbeforesaving(self.data, settings)
-
   def primarykey(self, args:Mapping, slugs:Mapping=None, required:set=None) -> dict:
     this = {}
 
     def callback(alias, prop):
       if prop.get('primary_key', False):
+        condition = prop.get('when')
+
+        if condition:
+          _ = dirname(alias)
+          args_ = args if _ == '' else get(args, _)
+
+          if not jinja.compile_expression(condition)(_=args, **args_):
+            return
+
         value = get(args, alias)
 
         if value is None:

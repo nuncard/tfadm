@@ -3,9 +3,8 @@ from .methods import Method, Methods
 from .module import Module
 from .path import VirtualPath
 from .properties import Properties
-from .settings import merge, Descriptor, Settings
+from .settings import merge, pop, Descriptor, Settings
 from .template import jinja, Template
-from click import secho
 from collections.abc import Mapping
 from os import chdir
 from os.path import dirname, join as joinpath
@@ -14,7 +13,7 @@ import errno
 
 class Resource(Settings):
   address = Descriptor('address')
-  conflits_with = Descriptor('conflits_with')
+  conflicts_with = Descriptor('conflicts_with')
   depends_on = Descriptor('depends_on')
   description = Descriptor('description')
   events = Descriptor('events')
@@ -45,7 +44,7 @@ class Resource(Settings):
     self.root = ''
     self.source = cfg.get('source', 'locals.tf.json')
     self.address = cfg.get('address', 'locals')
-    self.conflits_with = cfg.get('conflits_with')
+    self.conflicts_with = cfg.get('conflicts_with')
 
     self.template = Template(self, cfg, 'template')
     self.properties = Properties(self, cfg, 'properties')
@@ -89,6 +88,40 @@ class Resource(Settings):
     except ValueError as e:
       raise Error(self.name, str(e))
 
+  def beforesave(self, settings:Mapping):
+    actions = self.events.get('onbeforesave', [])
+
+    if not actions:
+      return self
+
+    i = 0
+
+    if isinstance(actions, list):
+      i_ = '/{}/'
+    else:
+      actions = [actions]
+      i_ = '/'
+
+    for action in actions:
+      condition = action.get('when')
+
+      try:
+        if condition and not jinja.compile_expression(condition)(**settings):
+          continue
+      except Exception as e:
+        raise Error(self.name + '/events/onbeforesave' + i_.format(i) + 'when', *e.args)
+
+      keys = action.get('unset', [])
+
+      if keys:
+        if not isinstance(keys, list):
+          keys = [keys]
+
+        for key in keys:
+          pop(settings, key)
+
+    return self
+
   def trigger(self, event:str, args:Mapping, **options):
     event = 'on' + event
     props = self.properties
@@ -124,7 +157,7 @@ class Resource(Settings):
             if not condition or jinja.compile_expression(condition)(**args):
               _.pop(key.get('key'))
 
-          if resource_name.startswith('.'):
+          if item.get('internal', resource_name.startswith('.')):
             _.merge(item.get('args'))
           else:
             _ = merge(props.heritage(_), item.get('args'))

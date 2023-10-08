@@ -123,23 +123,20 @@ class Update(Method):
       pprint({context + '.arguments': args_})
       raise e
 
-    for key in props.conflits(args_):
-      pop(settings, key)
+    conflicts_with = resource.conflicts_with
 
-    conflits_with = resource.conflits_with
+    if conflicts_with:
+      if isinstance(conflicts_with, str):
+        conflicts_with = [conflicts_with]
 
-    if conflits_with:
-      if isinstance(conflits_with, str):
-        conflits_with = [conflits_with]
-
-      for key in conflits_with:
+      for key in conflicts_with:
         terraform.pop(key)
 
     if dry_run:
       settings = settings_
 
     try:
-      props.onbeforesaving(settings)
+      resource.beforesave(settings)
     except Exception as e:
       pprint({context + '.settings': settings})
       raise e

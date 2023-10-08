@@ -4,11 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.13] - 2023-10-08
 
 ### Added
 
-- Added CODEOWNERS file.
+- Added CODEOWNERS file;
+- Added `events/{event}/{command}/{resource}/internal` config key;
+- Added `onbeforesave` event.
+
+### Changed
+
+- Removed `properties\{name}\conflits_with` config key;
+- `conflits_with` config key renamed to `conflicts_with`;
+- Removed `properties\{name}\onbeforesaving` config key.
+
+### Fixed
+
+- Apply `when` condition when getting primary key arguments;
+- Apply `when` condition when converting infrastructure settings to arguments;
+- Inheritance must not include non-inheritable primary key arguments;
+- Resolve the object's primary key before applying sync filters;
+- Allow translating values to `null`.
 
 ## [0.12] - 2023-10-02
 
@@ -32,6 +48,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 - First release.
 
-[unreleased]: https://github.com/nuncard/tfadm/compare/v0.12...HEAD
+[unreleased]: https://github.com/nuncard/tfadm/compare/v0.13...HEAD
+[0.13]: https://github.com/nuncard/tfadm/compare/v0.12...v0.13
 [0.12]: https://github.com/nuncard/tfadm/compare/v0.11.0...v0.12
 [0.11.0]: https://github.com/nuncard/tfadm/releases/tag/v0.11.0
