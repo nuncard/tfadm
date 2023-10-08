@@ -123,13 +123,13 @@ class Update(Method):
       pprint({context + '.arguments': args_})
       raise e
 
-    conflits_with = resource.conflits_with
+    conflicts_with = resource.conflicts_with
 
-    if conflits_with:
-      if isinstance(conflits_with, str):
-        conflits_with = [conflits_with]
+    if conflicts_with:
+      if isinstance(conflicts_with, str):
+        conflicts_with = [conflicts_with]
 
-      for key in conflits_with:
+      for key in conflicts_with:
         terraform.pop(key)
 
     if dry_run:

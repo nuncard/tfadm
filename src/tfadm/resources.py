@@ -5,7 +5,6 @@ from .path import VirtualPath
 from .properties import Properties
 from .settings import merge, pop, Descriptor, Settings
 from .template import jinja, Template
-from click import secho
 from collections.abc import Mapping
 from os import chdir
 from os.path import dirname, join as joinpath
@@ -14,7 +13,7 @@ import errno
 
 class Resource(Settings):
   address = Descriptor('address')
-  conflits_with = Descriptor('conflits_with')
+  conflicts_with = Descriptor('conflicts_with')
   depends_on = Descriptor('depends_on')
   description = Descriptor('description')
   events = Descriptor('events')
@@ -45,7 +44,7 @@ class Resource(Settings):
     self.root = ''
     self.source = cfg.get('source', 'locals.tf.json')
     self.address = cfg.get('address', 'locals')
-    self.conflits_with = cfg.get('conflits_with')
+    self.conflicts_with = cfg.get('conflicts_with')
 
     self.template = Template(self, cfg, 'template')
     self.properties = Properties(self, cfg, 'properties')
