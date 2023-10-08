@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.13] - 2023-10-08
 
 ### Added
 
@@ -48,6 +48,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 - First release.
 
-[unreleased]: https://github.com/nuncard/tfadm/compare/v0.12...HEAD
+[unreleased]: https://github.com/nuncard/tfadm/compare/v0.13...HEAD
+[0.13]: https://github.com/nuncard/tfadm/compare/v0.12...v0.13
 [0.12]: https://github.com/nuncard/tfadm/compare/v0.11.0...v0.12
 [0.11.0]: https://github.com/nuncard/tfadm/releases/tag/v0.11.0
