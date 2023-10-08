@@ -4,6 +4,7 @@ from .template import jinja
 from collections import UserDict
 from collections.abc import Mapping
 from json import dumps as json_encode, loads as json_decode
+from os.path import dirname
 from pathlib import PurePosixPath
 from slugify import slugify as fnslugify
 from zlib import adler32, crc32
@@ -499,6 +500,15 @@ class Properties(UserDict):
 
     def callback(alias, prop):
       if prop.get('primary_key', False):
+        condition = prop.get('when')
+
+        if condition:
+          _ = dirname(alias)
+          args_ = args if _ == '' else get(args, _)
+
+          if not jinja.compile_expression(condition)(_=args, **args_):
+            return
+
         value = get(args, alias)
 
         if value is None:

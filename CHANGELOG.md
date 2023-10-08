@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 - Added CODEOWNERS file.
 
+### Fixed
+
+- Apply the `when` condition when getting primary key arguments.
+
 ## [0.12] - 2023-10-02
 
 ### Added
