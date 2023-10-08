@@ -13,49 +13,6 @@ import re
 
 slugify_regex = r'[^-a-zA-Z0-9_]+'
 
-def conflits(properties:Mapping, args:Mapping, prefix:str='', root=None) -> list:
-  keys = []
-
-  if args is None:
-    args = {}
-
-  if root is None:
-    root = args
-
-  for key, prop in properties.items():
-    condition = prop.get('when')
-
-    try:
-      if condition and not jinja.compile_expression(condition)(_=root, **args):
-        continue
-    except Exception as e:
-      raise Error(key + '/when', *e.args)
-
-    alias = prop.get('alias', key)
-    value = args.get(alias)
-
-    if value is None:
-      continue
-
-    conflits_with = prop.get('conflits_with')
-
-    if conflits_with:
-      if isinstance(conflits_with, str):
-        conflits_with = [conflits_with]
-
-      for _ in conflits_with:
-        keys.append(prefix + _)
-
-      continue
-
-    props = prop.get('properties')
-
-    if props:
-      key = prop.get('use', key)
-      keys.extend(conflits(props, value, prefix + key + '/', root))
-
-  return keys
-
 def compute(prop:Mapping, value, args:Mapping):
   type_ = prop.get('type')
 
@@ -493,9 +450,6 @@ class Properties(UserDict):
 
     self.walk(setdefault)
     self.parent = parent
-
-  def conflits(self, args:Mapping) -> list:
-    return conflits(self.data, args)
 
   def heritage(self, args:Mapping) -> dict:
     this = {}
