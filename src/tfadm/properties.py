@@ -199,44 +199,6 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
 
   return args
 
-def onbeforesaving(properties:Mapping, settings:Mapping, root:Mapping=None) -> Mapping:
-  if settings is None:
-    return settings
-
-  if root is None:
-    root = settings
-
-  for key, prop in properties.items():
-    if prop.get('ignore', False):
-      continue
-
-    key = prop.get('use', key)
-    value = get(settings, key)
-    props = prop.get('properties')
-
-    if props:
-      try:
-        onbeforesaving(props, value, root)
-      except Error as e:
-        raise Error(key + '/properties/' + e.args[0], *e.args[1:])
-
-      if not value:
-        pop(settings, key)
-    else:
-      expr = prop.get('onbeforesaving')
-
-      if expr:
-        try:
-          jinja.compile_expression(expr)(_=root, __=settings, this=value, **settings)
-        except Exception as e:
-          raise Error(key + '/onbeforesaving', *e.args)
-
-      if value is None:
-        if not prop.get('nullable', False):
-          pop(settings, key)
-
-  return settings
-
 def sync(properties:Mapping, settings:Mapping, root:Mapping=None) -> dict:
   if settings is None:
     settings = {}
@@ -464,9 +426,6 @@ class Properties(UserDict):
     self.walk(callback)
 
     return this
-
-  def onbeforesaving(self, settings):
-    return onbeforesaving(self.data, settings)
 
   def primarykey(self, args:Mapping, slugs:Mapping=None, required:set=None) -> dict:
     this = {}

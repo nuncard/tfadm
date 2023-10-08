@@ -15,7 +15,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Changed
 
 - Removed `properties\{name}\conflits_with` config key;
-- `conflits_with` config key renamed to `conflicts_with`.
+- `conflits_with` config key renamed to `conflicts_with`;
+- Removed `properties\{name}\onbeforesaving` config key.
 
 ### Fixed
 
