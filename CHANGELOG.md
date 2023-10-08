@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Added
 
-- Added CODEOWNERS file.
+- Added CODEOWNERS file;
+- Added `events/{event}/{command}/{resource}/internal` config key.
 
 ### Fixed
 

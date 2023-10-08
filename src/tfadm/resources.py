@@ -124,7 +124,7 @@ class Resource(Settings):
             if not condition or jinja.compile_expression(condition)(**args):
               _.pop(key.get('key'))
 
-          if resource_name.startswith('.'):
+          if item.get('internal', resource_name.startswith('.')):
             _.merge(item.get('args'))
           else:
             _ = merge(props.heritage(_), item.get('args'))
