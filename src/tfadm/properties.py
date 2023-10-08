@@ -493,7 +493,7 @@ class Properties(UserDict):
     this = {}
 
     def callback(alias, prop):
-      if prop.get('inherit', False) or prop.get('primary_key', False):
+      if prop.get('inherit', prop.get('primary_key', False)):
         value = get(args, alias)
 
         if value is not None:

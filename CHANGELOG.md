@@ -13,7 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 
 - Apply `when` condition when getting primary key arguments;
-- Apply `when` condition when converting infrastructure settings to arguments.
+- Apply `when` condition when converting infrastructure settings to arguments;
+- Inheritance must not include non-inheritable primary key arguments.
 
 ## [0.12] - 2023-10-02
 
