@@ -65,8 +65,10 @@ def compute(prop:Mapping, value, args:Mapping):
   translator = prop.get('translate')
 
   if translator:
-    key = value if isinstance(value, (str, bool, int, float, complex)) else str(value)
-    value = translator.get(key, value)
+    for v1, v2 in translator.items():
+      if value == v1:
+        value = v2
+        break
 
   expr = prop.get('expr')
 
@@ -193,14 +195,20 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
           pass
 
       try:
-        value = compute(prop, value, args_)
+        _ = compute(prop, value, args_)
       except KeyError as e:
         raise KeyError(key, *e.args)
       except Error as e:
         raise Error(key + '/' + e.args[0], *e.args[1:])
 
-      if value is None:
+      if _ is None:
+        if value is not None:
+          pop(args, alias)
+          pop(args_, alias)
+
         continue
+
+      value = _
 
       if slugs and primary_key:
         alias_ = alias + '_'

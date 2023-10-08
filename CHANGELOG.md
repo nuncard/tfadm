@@ -15,7 +15,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Apply `when` condition when getting primary key arguments;
 - Apply `when` condition when converting infrastructure settings to arguments;
 - Inheritance must not include non-inheritable primary key arguments;
-- Resolve the object's primary key before applying sync filters.
+- Resolve the object's primary key before applying sync filters;
+- Allow translating values to `null`.
 
 ## [0.12] - 2023-10-02
 
