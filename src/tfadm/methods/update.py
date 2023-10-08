@@ -139,7 +139,7 @@ class Update(Method):
       settings = settings_
 
     try:
-      props.onbeforesaving(settings)
+      resource.beforesave(settings)
     except Exception as e:
       pprint({context + '.settings': settings})
       raise e

@@ -3,7 +3,7 @@ from .methods import Method, Methods
 from .module import Module
 from .path import VirtualPath
 from .properties import Properties
-from .settings import merge, Descriptor, Settings
+from .settings import merge, pop, Descriptor, Settings
 from .template import jinja, Template
 from click import secho
 from collections.abc import Mapping
@@ -88,6 +88,40 @@ class Resource(Settings):
       raise PatternError(self.name, *e.args)
     except ValueError as e:
       raise Error(self.name, str(e))
+
+  def beforesave(self, settings:Mapping):
+    actions = self.events.get('onbeforesave', [])
+
+    if not actions:
+      return self
+
+    i = 0
+
+    if isinstance(actions, list):
+      i_ = '/{}/'
+    else:
+      actions = [actions]
+      i_ = '/'
+
+    for action in actions:
+      condition = action.get('when')
+
+      try:
+        if condition and not jinja.compile_expression(condition)(**settings):
+          continue
+      except Exception as e:
+        raise Error(self.name + '/events/onbeforesave' + i_.format(i) + 'when', *e.args)
+
+      keys = action.get('unset', [])
+
+      if keys:
+        if not isinstance(keys, list):
+          keys = [keys]
+
+        for key in keys:
+          pop(settings, key)
+
+    return self
 
   def trigger(self, event:str, args:Mapping, **options):
     event = 'on' + event
