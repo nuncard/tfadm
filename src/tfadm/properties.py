@@ -272,17 +272,28 @@ def onbeforesaving(properties:Mapping, settings:Mapping, root:Mapping=None) -> M
 
   return settings
 
-def sync(properties:Mapping, settings:Mapping):
+def sync(properties:Mapping, settings:Mapping, root:Mapping=None) -> dict:
   if settings is None:
     settings = {}
 
   this = {}
+
+  if root is None:
+    root = this
 
   for key, prop in properties.items():
     sync_key = prop.get('sync', key)
 
     if sync_key is False:
       continue
+
+    condition = prop.get('when')
+
+    try:
+      if condition and not jinja.compile_expression(condition)(_=root, **this):
+        continue
+    except Exception as e:
+      raise Error(key + '/when', *e.args)
 
     if isinstance(sync_key, list):
       for k in sync_key:
@@ -300,7 +311,7 @@ def sync(properties:Mapping, settings:Mapping):
     props = prop.get('properties')
 
     if props:
-      value = sync(props, value)
+      value = sync(props, value, root)
 
       if not value:
         continue

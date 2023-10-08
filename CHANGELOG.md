@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Fixed
 
-- Apply the `when` condition when getting primary key arguments.
+- Apply `when` condition when getting primary key arguments;
+- Apply `when` condition when converting infrastructure settings to arguments.
 
 ## [0.12] - 2023-10-02
 
