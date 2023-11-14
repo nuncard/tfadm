@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Fixed
 
-- `create` command calls a duplicate of `cli_update` function.
+- `create` command calls a duplicate of `cli_update` function;
+- Improved `Update` method debug messages;
+- Use default value if value is null.
 
 ## [0.13] - 2023-10-08
 

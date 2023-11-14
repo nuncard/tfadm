@@ -145,7 +145,7 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
     else:
       primary_key = prop.get('primary_key', False)
 
-      if defaults and value is None and (primary_key or prop.get('ignore', False)):
+      if defaults and value is None:
         try:
           value = getformat(prop, 'default', args_)
         except:
