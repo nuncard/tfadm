@@ -1,7 +1,6 @@
 from .settings import get, update
 from collections import UserList
 from collections.abc import Mapping
-from os.path import dirname
 from parse import parse
 from pathlib import Path, PurePosixPath
 import re
