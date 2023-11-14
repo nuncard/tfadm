@@ -388,8 +388,10 @@ class Properties(UserDict):
         if resource.address == 'variable':
           for prop in inherited.values():
             prop.pop('computed', None)
-            prop.pop('ignore', False)
             prop.setdefault('type', 'string')
+
+            if prop.get('description'):
+              prop.pop('ignore', False)
 
         self.data = merge(inherited, self.data)
 

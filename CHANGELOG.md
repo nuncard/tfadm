@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 [Unreleased]
 
+### Changed
+
+- By default ignore `variable` resource inherited properties that do not have a description;
+
 ### Fixed
 
 - `create` command calls a duplicate of `cli_update` function;
