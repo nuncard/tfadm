@@ -25,7 +25,7 @@ class Update(Method):
     pk = props.primarykey(args_, pk_, required)
 
     if required:
-      pprint({context + '.primary_key': pk})
+      pprint({context + '.args': args_})
       raise RequiredArgument(context, ', '.join(required))
 
     merge(pk_, pk)
