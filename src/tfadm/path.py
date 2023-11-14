@@ -1,6 +1,7 @@
 from .settings import get, update
 from collections import UserList
 from collections.abc import Mapping
+from os.path import dirname
 from parse import parse
 from pathlib import Path, PurePosixPath
 import re
@@ -52,13 +53,14 @@ class VirtualPath(UserList):
 
   def _inherit(self):
     parent = self.owner.parent
-    inherited = []
 
-    def inherit(key, prop):
-      if key in parent.path and prop.get('inherit', True):
-        inherited.append(key)
+    if parent and parent.path:
+      inherited = [*parent.path]
 
-    if parent:
+      def inherit(key, prop):
+        if key in parent.path and not prop.get('inherit', True):
+          inherited.remove(key)
+
       parent.properties.walk(inherit)
 
       if inherited:

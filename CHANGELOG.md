@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Improved `Update` method debug messages;
 - Use default value if value is null;
 - Do not convert null values to string;
-- Parse an existing path even if it is not full.
+- Parse an existing path even if it is not full;
+- Virtual path inherited out of order.
 
 ## [0.13] - 2023-10-08
 
