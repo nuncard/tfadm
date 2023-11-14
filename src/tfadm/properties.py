@@ -14,10 +14,11 @@ import re
 slugify_regex = r'[^-a-zA-Z0-9_]+'
 
 def compute(prop:Mapping, value, args:Mapping):
-  type_ = prop.get('type')
+  if value is not None:
+    type_ = prop.get('type')
 
-  if type_ in ['json', 'string'] and not isinstance(value, str):
-    value = json_encode(value)
+    if type_ in ['json', 'string'] and not isinstance(value, str):
+      value = json_encode(value)
 
   translator = prop.get('translate')
 
