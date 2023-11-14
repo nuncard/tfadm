@@ -11,7 +11,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - `create` command calls a duplicate of `cli_update` function;
 - Improved `Update` method debug messages;
 - Use default value if value is null;
-- Do not convert null values to string.
+- Do not convert null values to string;
+- Parse an existing path even if it is not full.
 
 ## [0.13] - 2023-10-08
 
