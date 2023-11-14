@@ -134,7 +134,7 @@ With RESOURCE, dump resource configuration to stdout.
 )
 @click.argument('resource')
 @click.argument('path', required=False, nargs=-1)
-def cli_update(resource, path=None, **opts):
+def cli_create(resource, path=None, **opts):
   """Creates an object from stdin.
 
 RESOURCE must be specified. Use 'tfadm resources' for a complete list of
@@ -149,7 +149,7 @@ If the object already exists, tfadm will error out, unless the '-o', or
   resource = Resources().load(resource)
 
   for args in read_args(resource, path):
-    resource('create', args, **opts)
+    resource('create', args, defaults=True, **opts)
 
 @cli.command('update')
 @click.option(
