@@ -128,8 +128,6 @@ class Resource(Settings):
 
     for cmd_name, resources in self.events.get(event, {}).items():
       for resource_name, settings in resources.items():
-        _ = Settings(args, clone=True)
-
         if not isinstance(settings, list):
           settings = [settings]
 
@@ -145,7 +143,21 @@ class Resource(Settings):
           except Exception as e:
             raise Error(self.name + '/events/' + event + '/' + cmd_name + '/' + i + '/when', *e.args)
 
+          resource = self.owner.load(resource_name)
+          method = resource.methods.get(cmd_name)
+
+          if not isinstance(method, Method):
+            raise Error(self.name + '/events/' + event, 'No command named', cmd_name)
+
+          if item.get('internal', resource_name.startswith('.')):
+            _ = Settings(args, clone=True)
+          else:
+            _ = Settings(props.heritage(args)).merge(resource.properties.primarykey(args))
+
           unset = item.get('unset', [])
+
+          if not isinstance(unset, list):
+            unset = [unset]
 
           for key in unset:
             if isinstance(key, str):
@@ -157,17 +169,7 @@ class Resource(Settings):
             if not condition or jinja.compile_expression(condition)(**args):
               _.pop(key.get('key'))
 
-          if item.get('internal', resource_name.startswith('.')):
-            _.merge(item.get('args'))
-          else:
-            _ = merge(props.heritage(_), item.get('args'))
-
-          method = self.owner.load(resource_name).methods.get(cmd_name)
-
-          if not isinstance(method, Method):
-            raise Error(self.name + '/events/' + event, 'No command named', cmd_name)
-
-          method(_, **merge({}, options, item.get('options', {})))
+          method(_.merge(item.get('args')), **merge({}, options, item.get('options', {})))
 
 class Resources(dict):
   def __init__(self):

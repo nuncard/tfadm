@@ -1,7 +1,6 @@
 from .settings import get, update
 from collections import UserList
 from collections.abc import Mapping
-from os.path import dirname
 from parse import parse
 from pathlib import Path, PurePosixPath
 import re
@@ -24,14 +23,10 @@ class VirtualPath(UserList):
     path = Path(path)
 
     if not resource.source.startswith(this) and path.is_dir():
-      mapping = parse(dirname(self.owner.source), self.join(*path.parts), case_sensitive=True)
+      source = PurePosixPath(self.owner.source)
+      mapping = parse(self.join(*source.parts[0:len(path.parts)]), self.join(*path.parts), case_sensitive=True)
       args = mapping.named if mapping else {}
-
-      try:
-        self.owner.source.format_map(args)
-        return args
-      except:
-        pass
+      return args
 
     parts = path.parts
 
@@ -57,13 +52,14 @@ class VirtualPath(UserList):
 
   def _inherit(self):
     parent = self.owner.parent
-    inherited = []
 
-    def inherit(key, prop):
-      if key in parent.path and prop.get('inherit', True):
-        inherited.append(key)
+    if parent and parent.path:
+      inherited = [*parent.path]
 
-    if parent:
+      def inherit(key, prop):
+        if key in parent.path and not prop.get('inherit', True):
+          inherited.remove(key)
+
       parent.properties.walk(inherit)
 
       if inherited:

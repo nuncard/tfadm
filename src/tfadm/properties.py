@@ -14,10 +14,11 @@ import re
 slugify_regex = r'[^-a-zA-Z0-9_]+'
 
 def compute(prop:Mapping, value, args:Mapping):
-  type_ = prop.get('type')
+  if value is not None:
+    type_ = prop.get('type')
 
-  if type_ in ['json', 'string'] and not isinstance(value, str):
-    value = json_encode(value)
+    if type_ in ['json', 'string'] and not isinstance(value, str):
+      value = json_encode(value)
 
   translator = prop.get('translate')
 
@@ -145,7 +146,7 @@ def init(properties:Mapping, args:Mapping, defaults:bool=True, slugs:bool=True, 
     else:
       primary_key = prop.get('primary_key', False)
 
-      if defaults and value is None and (primary_key or prop.get('ignore', False)):
+      if defaults and value is None:
         try:
           value = getformat(prop, 'default', args_)
         except:
@@ -387,8 +388,10 @@ class Properties(UserDict):
         if resource.address == 'variable':
           for prop in inherited.values():
             prop.pop('computed', None)
-            prop.pop('ignore', False)
             prop.setdefault('type', 'string')
+
+            if prop.get('description'):
+              prop.pop('ignore', False)
 
         self.data = merge(inherited, self.data)
 
