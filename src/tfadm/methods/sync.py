@@ -169,6 +169,20 @@ class Sync(Method):
       args = merge(merge({}, heritage), args, clone=False)
       args_ = props(args, defaults=False, slugs=False)
 
+      if filters_:
+        if not match(args_, filters_, literally=True):
+          continue
+
+      if condition and not opts.get('force', False):
+        if isinstance(condition, str):
+          try:
+            if not jinja.compile_expression(condition)(**args):
+              continue
+          except Exception as e:
+            raise Error(str(self.context / 'when'), *e.args)
+        elif not match(args, condition):
+          continue
+
       if parent:
         required = set()
         pprops.primarykey(args_, required=required)
@@ -184,20 +198,6 @@ class Sync(Method):
             continue
 
           raise RequiredArgument(self.owner.name, required)
-
-      if filters_:
-        if not match(args_, filters_, literally=True):
-          continue
-
-      if condition and not opts.get('force', False):
-        if isinstance(condition, str):
-          try:
-            if not jinja.compile_expression(condition)(**args):
-              continue
-          except Exception as e:
-            raise Error(str(self.context / 'when'), *e.args)
-        elif not match(args, condition):
-          continue
 
       callback(args)
       count += 1

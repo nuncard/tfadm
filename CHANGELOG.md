@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- `methods/sync/when` clause not applied when parent arguments are missing.
+
 ## [0.14] - 2023-11-14
 
 ### Changed
