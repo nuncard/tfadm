@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.1] - 2023-11-25
+
+### Fixed
+
+- `methods/sync/when` clause not applied when parent arguments are missing.
+
 ## [0.14] - 2023-11-14
 
 ### Changed
@@ -64,7 +70,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 - First release.
 
-[unreleased]: https://github.com/nuncard/tfadm/compare/v0.14...HEAD
+[unreleased]: https://github.com/nuncard/tfadm/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/nuncard/tfadm/compare/v0.14...v0.14.1
 [0.14]: https://github.com/nuncard/tfadm/compare/v0.13...v0.14
 [0.13]: https://github.com/nuncard/tfadm/compare/v0.12...v0.13
 [0.12]: https://github.com/nuncard/tfadm/compare/v0.11.0...v0.12
